@@ -5,7 +5,6 @@
 
 import {NextRequest, NextResponse} from 'next/server';
 import sgMail from '@sendgrid/mail';
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // This is commented out as there is no db configured.
