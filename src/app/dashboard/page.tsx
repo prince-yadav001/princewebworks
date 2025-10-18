@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { ArrowUpRight, PlusCircle } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import {
+    Users,
+    ListTodo,
+    Phone,
+  } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,45 +14,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-    Bar,
-    BarChart,
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
-  } from "recharts"
 import { activities, leads, tasks, users } from "@/lib/placeholder-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import LeadsOverviewChart from "@/components/charts/leads-overview-chart";
 
 export default function DashboardPage() {
   const totalValue = leads.reduce((sum, lead) => sum + lead.value, 0);
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'Completed').length;
   const newLeadsThisMonth = leads.filter(l => l.status === 'New').length; // Simplified for example
-
-  const chartData = [
-    { name: "Jan", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Feb", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Mar", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Apr", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "May", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Jun", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Jul", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Aug", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Sep", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Oct", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Nov", total: Math.floor(Math.random() * 5000) + 1000 },
-    { name: "Dec", total: Math.floor(Math.random() * 5000) + 1000 },
-  ]
 
   return (
     <div className="flex flex-col w-full">
@@ -109,25 +85,7 @@ export default function DashboardPage() {
             <CardTitle>Leads Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={chartData}>
-                <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                />
-                <YAxis
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `$${value}`}
-                />
-                <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-            </ResponsiveContainer>
+            <LeadsOverviewChart />
           </CardContent>
         </Card>
         <Card>
