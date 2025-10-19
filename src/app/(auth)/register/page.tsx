@@ -60,12 +60,12 @@ export default function RegisterPage() {
         description: "Please check your email for the verification OTP.",
       });
 
-      // Redirect to the verification page
+      // Redirect to the verification page with the user ID
       if (data.redirect) {
         router.push(data.redirect);
       } else {
-        // Fallback if redirect is not in response
-        router.push(`/id/verify-email?email=${encodeURIComponent(email)}`);
+        // Fallback, though should not be needed
+        router.push(`/`);
       }
 
     } catch (err: any) {
