@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Users, ListTodo, Phone, Activity, Bell } from "lucide-react";
@@ -41,6 +46,24 @@ const featureCards = [
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === "hero");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+
+  if (loading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background">

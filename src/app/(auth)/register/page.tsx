@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -34,6 +33,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
