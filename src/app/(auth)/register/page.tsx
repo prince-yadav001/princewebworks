@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +14,64 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Something went wrong");
+      }
+
+      toast({
+        title: "Registration Successful",
+        description: "Please check your email for the verification OTP.",
+      });
+
+      // Redirect to the verification page
+      if (data.redirect) {
+        router.push(data.redirect);
+      } else {
+        router.push(`/id/verify-email?email=${encodeURIComponent(email)}`);
+      }
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card>
@@ -27,14 +82,26 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="full-name">Full name</Label>
-            <Input id="full-name" placeholder="Max Robinson" required />
+            <Input
+              id="full-name"
+              placeholder="Max Robinson"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" placeholder="maxrobinson" required />
+            <Input
+              id="username"
+              placeholder="maxrobinson"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
@@ -43,6 +110,8 @@ export default function RegisterPage() {
               type="email"
               placeholder="m@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
@@ -52,6 +121,8 @@ export default function RegisterPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <Button
                 type="button"
@@ -78,6 +149,8 @@ export default function RegisterPage() {
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
                 required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <Button
                 type="button"
@@ -99,10 +172,13 @@ export default function RegisterPage() {
               </Button>
             </div>
           </div>
-          <Button type="submit" className="w-full">
-            Create an account
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Creating account..." : "Create an account"}
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="underline">

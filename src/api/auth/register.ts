@@ -4,7 +4,9 @@ import crypto from "crypto";
 import sgMail from "@sendgrid/mail";
 
 const prisma = new PrismaClient();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 export async function POST(req: Request) {
   try {
@@ -36,24 +38,26 @@ export async function POST(req: Request) {
     });
 
     // ✅ Send OTP via SendGrid
-    const msg = {
-      to: email,
-      from: {
-        email: "noreply@yourdomain.com", // ⚠️ yah address verified hona chahiye SendGrid me
-        name: "Project Portal",
-      },
-      subject: "Verify your email address",
-      html: `
-        <div style="font-family:Arial,sans-serif;line-height:1.6;">
-          <h2>Welcome, ${name}!</h2>
-          <p>Use the following OTP to verify your email:</p>
-          <h3 style="color:#4CAF50;">${otp}</h3>
-          <p>This code will expire in 10 minutes.</p>
-        </div>
-      `,
-    };
+    if (process.env.SENDGRID_API_KEY) {
+      const msg = {
+        to: email,
+        from: {
+          email: "noreply@yourdomain.com", // ⚠️ yah address verified hona chahiye SendGrid me
+          name: "Project Portal",
+        },
+        subject: "Verify your email address",
+        html: `
+          <div style="font-family:Arial,sans-serif;line-height:1.6;">
+            <h2>Welcome, ${name}!</h2>
+            <p>Use the following OTP to verify your email:</p>
+            <h3 style="color:#4CAF50;">${otp}</h3>
+            <p>This code will expire in 10 minutes.</p>
+          </div>
+        `,
+      };
+      await sgMail.send(msg);
+    }
 
-    await sgMail.send(msg);
 
     // ✅ Return redirect to verify-email page
     return NextResponse.json({
