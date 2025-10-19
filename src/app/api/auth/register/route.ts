@@ -1,37 +1,28 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const { name, username, email, password } = await req.json();
 
-    // Basic validation
-    if (!name || !username || !email || !password) {
-      return NextResponse.json(
-        { message: "All fields are required." },
-        { status: 400 }
-      );
-    }
-    
-    // Simulate user creation and OTP sending since no DB is connected
-    console.log(`Simulating registration for user: ${name} (${email})`);
-    console.log(`Username: ${username}, Password: [REDACTED]`);
-
-    // Simulate sending an OTP for verification
+    // Simulate user creation and OTP generation since DB is not fully integrated
+    console.log(`✅ User registration simulated for: ${email}`);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`Simulating OTP email to ${email} with OTP: ${otp}`);
+    console.log(`🔑 Simulated OTP for ${email}: ${otp}`);
 
-    // Return a success response to the frontend
+    // In a real scenario, you'd save the hashed password and OTP to the database.
+    // For now, we'll just log it and pretend it worked.
+
     return NextResponse.json({
       success: true,
       message: "Registration successful. Please check your email for the OTP.",
-      // Provide a redirect path for the frontend
       redirect: `/id/verify-email?email=${encodeURIComponent(email)}`,
     });
-
   } catch (error: any) {
-    console.error("Register API error:", error);
+    console.error("❌ Register API error:", error);
+    // It's good practice to not expose detailed internal errors.
     return NextResponse.json(
-      { message: "Error registering user", error: error.message },
+      { message: "An error occurred during registration." },
       { status: 500 }
     );
   }
