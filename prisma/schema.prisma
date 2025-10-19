@@ -11,28 +11,27 @@ datasource db {
 }
 
 model User {
-  id              String           @id @unique
-  name            String
-  username        String           @unique
-  email           String           @unique
-  password        String
-  role            String           @default("USER")
-  isVerified      Boolean          @default(false)
-  otp             String?
-  lastLogin       DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  applications    JobApplication[]
+  id           String    @id @default("pww-uuid")
+  name         String
+  username     String    @unique
+  email        String    @unique
+  password     String
+  otp          String?
+  isVerified   Boolean   @default(false)
+  role         String    @default("USER") // ADMIN or USER
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+  applications JobApplication[]
 }
 
 model Job {
-  id           String           @id @default(cuid())
+  id           String   @id @default(cuid())
   title        String
   department   String?
   description  String
   location     String?
   type         String? // e.g. Full-time, Remote
-  createdAt    DateTime         @default(now())
+  createdAt    DateTime @default(now())
   applications JobApplication[]
 }
 
@@ -41,7 +40,7 @@ model JobApplication {
   userId    String
   jobId     String
   appliedAt DateTime @default(now())
-  status    String   @default("Pending")
+  status    String   @default("Pending") // e.g., Pending, Shortlisted, Rejected
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
