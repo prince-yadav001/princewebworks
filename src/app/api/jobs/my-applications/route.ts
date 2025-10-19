@@ -1,8 +1,5 @@
-
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -26,7 +23,5 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Failed to fetch applications:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

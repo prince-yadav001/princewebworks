@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
@@ -14,7 +12,7 @@ if (process.env.SENDGRID_API_KEY) {
 
 export async function POST(req: Request) {
   try {
-    const { name, username, email, password } = await req.json();
+    const { name, username, email, password, role } = await req.json();
 
     if (!name || !username || !email || !password) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
@@ -43,6 +41,7 @@ export async function POST(req: Request) {
         password: hashedPassword,
         otp,
         isVerified: false,
+        role: role || 'USER', // Default to 'USER' if role is not provided
       },
     });
 
@@ -125,7 +124,5 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("❌ Registration error:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

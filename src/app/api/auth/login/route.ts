@@ -1,10 +1,7 @@
-
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
@@ -36,6 +33,12 @@ export async function POST(req: Request) {
     if (!isPasswordValid) {
       return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
     }
+
+    // Update last login time
+    const updatedUser = await prisma.user.update({
+        where: { email },
+        data: { lastLogin: new Date() },
+    });
 
     console.log(`✅ Login successful for: ${email}`);
 
@@ -78,7 +81,7 @@ export async function POST(req: Request) {
       }
 
     // Exclude password from the returned user object
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = updatedUser;
 
     return NextResponse.json({ 
         success: true, 
@@ -89,7 +92,5 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("❌ Login error:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
