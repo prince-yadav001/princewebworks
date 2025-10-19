@@ -1,17 +1,13 @@
-// ---------- Prisma Client Generator ----------
 generator client {
   provider      = "prisma-client-js"
-  // Multiple binary targets ensure compatibility on local + Vercel servers
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
-// ---------- Database Connection ----------
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ---------- Database Models ----------
 model User {
   id               String    @id @default(cuid())
   name             String
