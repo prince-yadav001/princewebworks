@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -43,7 +42,8 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(api.register, {
+      // Calling the local API route
+      const res = await fetch('/api/auth/register', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, username, email, password }),
@@ -64,6 +64,7 @@ export default function RegisterPage() {
       if (data.redirect) {
         router.push(data.redirect);
       } else {
+        // Fallback if redirect is not in response
         router.push(`/id/verify-email?email=${encodeURIComponent(email)}`);
       }
 
