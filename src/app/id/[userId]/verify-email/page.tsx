@@ -73,19 +73,21 @@ export default function VerifyEmailPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="grid gap-6">
-            <div className="grid gap-2 text-center">
+            <div className="grid gap-2 justify-center">
                 <InputOTP
                   maxLength={6}
                   value={otp}
                   onChange={(value) => setOtp(value)}
-                  render={({ slots }) => (
-                    <InputOTPGroup className="gap-2">
-                      {slots.map((slot, index) => (
-                        <InputOTPSlot key={index} {...slot} />
-                      ))}
-                    </InputOTPGroup>
-                  )}
-                />
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
             </div>
 
             {error && <p className="text-sm text-center text-red-500">{error}</p>}
