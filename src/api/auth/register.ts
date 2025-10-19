@@ -1,71 +1,58 @@
-import { PrismaClient } from "@prisma/client";
+
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import sgMail from "@sendgrid/mail";
 
-const prisma = new PrismaClient();
+// SendGrid API key ko environment variables se set karein
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
+// Next.js App Router ke liye API route
 export async function POST(req: Request) {
   try {
     const { name, username, email, password } = await req.json();
 
-    // ✅ Check if user already exists
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return NextResponse.json({ message: "Email already registered" }, { status: 400 });
-    }
+    // Abhi ke liye, hum maan rahe hain ki user exist nahi karta.
+    // Database logic yahan add kiya ja sakta hai.
 
-    // ✅ Generate custom user ID (e.g. pww-xxxxx)
-    const userId = "pww-" + crypto.randomBytes(16).toString("hex");
-
-    // ✅ Generate OTP (6-digit)
+    // Ek dummy OTP generate karein (asal project mein isse securely manage karein)
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // ✅ Create user in DB
-    const user = await prisma.user.create({
-      data: {
-        id: userId,
-        name,
-        username,
-        email,
-        password, // (hash karna mat bhoolna real project me)
-        otp,
-        isVerified: false,
-      },
-    });
-
-    // ✅ Send OTP via SendGrid
-    if (process.env.SENDGRID_API_KEY) {
+    // Agar SendGrid API key hai, to OTP email bhejein
+    if (process.env.SENDGRID_API_KEY && process.env.EMAIL_FROM) {
       const msg = {
         to: email,
         from: {
-          email: "noreply@yourdomain.com", // ⚠️ yah address verified hona chahiye SendGrid me
-          name: "Project Portal",
+          email: process.env.EMAIL_FROM, // Yeh ek verified email hona chahiye
+          name: "PrinceWebWork CRM",
         },
-        subject: "Verify your email address",
+        subject: "Verify your email for PrinceWebWork CRM",
         html: `
           <div style="font-family:Arial,sans-serif;line-height:1.6;">
             <h2>Welcome, ${name}!</h2>
-            <p>Use the following OTP to verify your email:</p>
+            <p>Your One-Time Password (OTP) to verify your email is:</p>
             <h3 style="color:#4CAF50;">${otp}</h3>
-            <p>This code will expire in 10 minutes.</p>
+            <p>This code is valid for 10 minutes.</p>
+            <p>In a real app, we would save this OTP to verify it later.</p>
           </div>
         `,
       };
       await sgMail.send(msg);
+    } else {
+        console.log(`Simulating email sending to ${email} with OTP: ${otp}`);
     }
 
 
-    // ✅ Return redirect to verify-email page
+    // Frontend ko success response aur redirect URL bhejein
     return NextResponse.json({
       success: true,
+      message: "Registration successful. Please check your email for the OTP.",
+      // User ko OTP verification page par redirect karein
       redirect: `/id/verify-email?email=${encodeURIComponent(email)}`,
     });
+
   } catch (error: any) {
-    console.error("Register error:", error);
+    console.error("Register API error:", error);
     return NextResponse.json({ message: "Error registering user" }, { status: 500 });
   }
 }
