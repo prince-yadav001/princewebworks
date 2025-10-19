@@ -10,6 +10,8 @@ import {
   Phone,
   History,
   Settings,
+  Briefcase,
+  FileText
 } from "lucide-react";
 
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -71,6 +73,8 @@ function SidebarNavDesktop() {
     { href: "/dashboard/leads", icon: Users, label: "Leads" },
     { href: "/dashboard/tasks", icon: ListTodo, label: "Tasks" },
     { href: "/dashboard/calls", icon: Phone, label: "Calls" },
+    { href: "/dashboard/jobs", icon: Briefcase, label: "Job Opportunities" },
+    { href: "/dashboard/my-applications", icon: FileText, label: "My Applications" },
     { href: "/dashboard/activity", icon: History, label: "Activity" },
     { href: "/dashboard/settings", icon: Settings, label: "Settings" },
   ];
