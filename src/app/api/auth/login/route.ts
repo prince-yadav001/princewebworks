@@ -34,12 +34,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Invalid credentials." }, { status: 401 });
     }
 
+<<<<<<< HEAD
     // Update last login time
+=======
+    // Update lastLogin time
+>>>>>>> 6cf6905 (eako ek deep cheak karo aur esaka exact error bataoo ki kya eror hai)
     const updatedUser = await prisma.user.update({
         where: { email },
         data: { lastLogin: new Date() },
     });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6cf6905 (eako ek deep cheak karo aur esaka exact error bataoo ki kya eror hai)
     console.log(`✅ Login successful for: ${email}`);
 
     // ✉️ Send Login Notification via SendGrid
