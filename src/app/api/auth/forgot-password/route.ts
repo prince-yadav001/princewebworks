@@ -63,6 +63,9 @@ export async function POST(req: Request) {
         console.log(`📧 Password reset email sent to ${email}`);
       } catch (emailError) {
         console.error("❌ SendGrid email error:", emailError);
+        // Even if email fails, don't expose the error to the client for security
+        // But we should return an internal server error to indicate a problem
+        return NextResponse.json({ message: "Could not send password reset email." }, { status: 500 });
       }
     } else {
         console.log(`🔑 Simulated Password Reset Link for ${email}: ${resetLink}`)
