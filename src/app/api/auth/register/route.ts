@@ -1,40 +1,33 @@
-import { NextResponse } from "next/server";
-import { randomUUID } from "crypto";
-
-// Simulate a database of users
-const users: { email: string; id: string }[] = [];
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const { name, username, email, password } = await req.json();
 
     // Check if user already exists
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-      return NextResponse.json(
-        { message: "User with this email already exists." },
-        { status: 409 } // 409 Conflict is a good status code for this
-      );
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return new Response(JSON.stringify({ message: "User already exists" }), { status: 400 });
     }
-    
-    // Simulate user creation and OTP generation
-    const userId = randomUUID();
-    users.push({ email, id: userId });
 
-    console.log(`✅ User registration simulated for: ${email}`);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`🔑 Simulated OTP for ${email}: ${otp}`);
-
-    return NextResponse.json({
-      success: true,
-      message: "Registration successful. Please check your email for the OTP.",
-      redirect: `/${userId}/verify-email`,
+    // Create new user
+    const user = await prisma.user.create({
+      data: { name, username, email, password },
     });
-  } catch (error: any) {
-    console.error("❌ Register API error:", error);
-    return NextResponse.json(
-      { message: "An error occurred during registration." },
-      { status: 500 }
+
+    console.log("✅ New user created:", user);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Registration successful",
+        redirect: `/id/verify-email?email=${encodeURIComponent(email)}`,
+      }),
+      { status: 200 }
     );
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }

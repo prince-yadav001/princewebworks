@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -52,6 +53,10 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        // Handle specific 409 conflict error
+        if (res.status === 409) {
+          throw new Error(data.message || "User with this email already exists.");
+        }
         throw new Error(data.message || "Something went wrong");
       }
 
@@ -61,10 +66,11 @@ export default function RegisterPage() {
       });
 
       // Redirect to the verification page with the user ID
-      if (data.redirect) {
-        router.push(data.redirect);
+      if (data.userId) {
+        router.push(`/${data.userId}/verify-email`);
       } else {
         // Fallback, though should not be needed
+        console.error("User ID not found in response, redirecting to home.");
         router.push(`/`);
       }
 
