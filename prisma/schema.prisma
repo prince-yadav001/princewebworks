@@ -1,22 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String
-  username         String    @unique
-  email            String    @unique
-  password         String
-  isVerified       Boolean   @default(false)
-  otp              String?
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
+  id              String           @id @unique
+  name            String
+  username        String           @unique
+  email           String           @unique
+  password        String
+  role            String           @default("USER")
+  isVerified      Boolean          @default(false)
+  otp             String?
+  lastLogin       DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  applications    JobApplication[]
+}
+
+model Job {
+  id           String           @id @default(cuid())
+  title        String
+  department   String?
+  description  String
+  location     String?
+  type         String? // e.g. Full-time, Remote
+  createdAt    DateTime         @default(now())
+  applications JobApplication[]
+}
+
+model JobApplication {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  appliedAt DateTime @default(now())
+  status    String   @default("Pending")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
 }
