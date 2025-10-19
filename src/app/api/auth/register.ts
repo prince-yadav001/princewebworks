@@ -1,5 +1,5 @@
 
-import { NextResponse } from "next/server";
+/*import { NextResponse } from "next/server";
 // SendGrid se judi samasyaon se bachne ke liye abhi isko comment kar rahe hain.
 // import sgMail from "@sendgrid/mail";
 
@@ -47,3 +47,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Error registering user" }, { status: 500 });
   }
 }
+*/
