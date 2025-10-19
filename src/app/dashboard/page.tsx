@@ -1,7 +1,6 @@
-
 "use client";
 import Link from "next/link";
-import { ArrowUpRight, PlusCircle, User, Calendar, Mail, CheckCircle } from "lucide-react";
+import { ArrowUpRight, PlusCircle, User, Calendar, Mail, CheckCircle, Users, Bell, ListTodo } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
