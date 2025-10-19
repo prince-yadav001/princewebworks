@@ -16,11 +16,13 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
   const params = useParams();
   const { toast } = useToast();
+  const { manualLogin } = useAuth();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,22 +41,32 @@ export default function VerifyEmailPage() {
     setLoading(true);
 
     try {
-      // Here you would call your API to verify the OTP
-      console.log(`Verifying OTP ${otp} for user ${userId}`);
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, otp }),
+      });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const data = await res.json();
 
-      // Simulate success/failure
-      if (otp === "123456") { // Example "correct" OTP
-        toast({
-          title: "Verification Successful",
-          description: "Your account has been verified. Redirecting to dashboard...",
-        });
-        router.push("/dashboard");
-      } else {
-        throw new Error("Invalid or expired OTP. Please try again.");
+      if (!res.ok) {
+        throw new Error(data.message || "Verification failed");
       }
+      
+      toast({
+        title: "Verification Successful",
+        description: "Your account has been verified. Redirecting to dashboard...",
+      });
+      
+      // Manually log the user in after verification
+      if (data.user) {
+        // In a real app, the API would return a token
+        // For now, we simulate this by passing the user object
+        manualLogin(data.user);
+      }
+      
+      router.push("/dashboard");
+
     } catch (err: any) {
       setError(err.message);
     } finally {

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 interface AuthContextType {
   user: any;
   login: (email: string, password: string) => Promise<void>;
+  manualLogin: (user: any) => void;
   logout: () => void;
   loading: boolean;
 }
@@ -18,21 +19,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      setLoading(false);
-      return;
+    // This logic is for when the page reloads.
+    // It checks if user data is in localStorage.
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Could not parse user from localStorage", e);
+        localStorage.removeItem("user");
+      }
     }
-    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data.user);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
+    // This is for the standard login page
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,22 +42,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
     const data = await res.json();
     if (res.ok) {
-      localStorage.setItem("accessToken", data.token);
+      // On successful login, save user to state and localStorage
       setUser(data.user);
+      localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/dashboard");
     } else {
       throw new Error(data.message || "Login failed");
     }
   };
 
+  const manualLogin = (userData: any) => {
+    // This is used after OTP verification to log the user in
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+  };
+
+
   const logout = () => {
-    localStorage.removeItem("accessToken");
+    // Clear user from state and localStorage
     setUser(null);
+    localStorage.removeItem("user");
     router.push("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, manualLogin, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

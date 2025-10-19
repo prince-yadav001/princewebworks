@@ -1,55 +1,72 @@
-// IMPORTANT: This is a placeholder API file.
-// It uses the correct Next.js App Router format, but the logic inside
-// is simulated because a database is not yet fully configured.
-
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcryptjs";
 
-// In-memory "database" for simulation purposes
-const users: any[] = [];
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     const { name, username, email, password } = await req.json();
 
-    // Check if user already exists in our simulated DB
-    const existingUser = users.find((user) => user.email === email);
-    if (existingUser) {
-      return new Response(
-        JSON.stringify({ message: "User with this email already exists." }),
-        { status: 409 } // 409 Conflict
+    if (!name || !username || !email || !password) {
+      return NextResponse.json(
+        { message: "All fields are required." },
+        { status: 400 }
       );
     }
 
-    // Simulate creating a new user
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "User with this email already exists." },
+        { status: 409 } // Conflict
+      );
+    }
+
+    // Hash password for security
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate user ID and OTP
     const userId = `pww-${uuidv4()}`;
-    const newUser = {
-      id: userId,
-      name,
-      username,
-      email,
-      password, // In a real app, hash this!
-      otp: Math.floor(100000 + Math.random() * 900000).toString(),
-    };
-    users.push(newUser);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    console.log("✅ User registration simulated for:", email);
-    console.log(`🔑 Simulated OTP for ${email}: ${newUser.otp}`);
+    // Save user to database
+    const newUser = await prisma.user.create({
+      data: {
+        id: userId,
+        name,
+        username,
+        email,
+        password: hashedPassword,
+        otp,
+        isVerified: false, // default false until email verified
+      },
+    });
 
-    // Return the new user's ID
+    console.log("✅ User saved:", newUser.email);
+    console.log(`🔑 OTP for ${email}: ${otp}`);
+
     return NextResponse.json(
       {
         success: true,
         message: "Registration successful. Please verify your email.",
-        userId: newUser.id, // Include the userId in the response
+        userId: newUser.id,
+        redirect: `/id/verify-email?email=${encodeURIComponent(email)}`,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
-    return new Response(
-      JSON.stringify({ message: "Internal Server Error" }),
+    console.error("❌ Registration error:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
