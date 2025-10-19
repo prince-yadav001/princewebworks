@@ -69,7 +69,6 @@ export default function RegisterPage() {
       }
 
     } catch (err: any) {
-      setError(err.message);
       if (err.message.includes('not valid JSON')) {
         setError('An unexpected error occurred. Please try again.');
       } else {
