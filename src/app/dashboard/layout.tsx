@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // ✅ redirect if not logged in
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/(auth)/login");
+      router.push("/login");
     }
   }, [loading, user, router]);
 
