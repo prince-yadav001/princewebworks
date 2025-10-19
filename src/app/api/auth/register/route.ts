@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
@@ -125,7 +123,5 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("❌ Registration error:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
