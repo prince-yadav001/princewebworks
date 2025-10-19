@@ -51,7 +51,11 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push("/dashboard");
+      if (user.role === 'ADMIN') {
+        router.push("/dashboard");
+      } else {
+        router.push(`/${user.id}/dashboard`);
+      }
     }
   }, [user, loading, router]);
 

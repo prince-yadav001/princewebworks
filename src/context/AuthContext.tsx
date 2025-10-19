@@ -32,6 +32,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setLoading(false);
   }, []);
+  
+  const handleRedirect = (user: any) => {
+    if (user.role === 'ADMIN') {
+      router.push("/dashboard");
+    } else {
+      router.push(`/${user.id}/dashboard`);
+    }
+  }
 
   const login = async (email: string, password: string) => {
     // This is for the standard login page
@@ -45,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // On successful login, save user to state and localStorage
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
-      router.push("/dashboard");
+      handleRedirect(data.user);
     } else {
       throw new Error(data.message || "Login failed");
     }
@@ -55,6 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // This is used after OTP verification to log the user in
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
+    handleRedirect(userData);
   };
 
 
