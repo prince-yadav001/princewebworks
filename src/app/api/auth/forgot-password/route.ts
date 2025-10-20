@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "If a user with that email exists, a reset link has been sent." }, { status: 200 });
     }
 
-    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'}/${user.id}/reset-password`;
+    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://princewebwork.vercel.app'}/${user.id}/reset-password`;
 
     // ✉️ Send Reset Link via SendGrid
     if (process.env.SENDGRID_API_KEY && process.env.EMAIL_FROM) {
