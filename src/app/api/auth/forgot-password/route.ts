@@ -19,8 +19,8 @@ export async function POST(req: Request) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      // Don't reveal if a user doesn't exist for security reasons
-      return NextResponse.json({ message: "If a user with that email exists, a reset link has been sent." }, { status: 200 });
+      // If user does not exist, return an error
+      return NextResponse.json({ message: "User with this email does not exist." }, { status: 404 });
     }
 
     const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'}/${user.id}/reset-password`;
@@ -63,6 +63,8 @@ export async function POST(req: Request) {
         console.log(`📧 Password reset email sent to ${email}`);
       } catch (emailError) {
         console.error("❌ SendGrid email error:", emailError);
+        // Even if email fails, we don't want to expose internal errors.
+        // We've already confirmed the user exists, so we send a success response.
       }
     } else {
         console.log(`🔑 Simulated Password Reset Link for ${email}: ${resetLink}`)
