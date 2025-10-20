@@ -59,13 +59,12 @@ export default function VerifyEmailPage() {
       });
       
       // Manually log the user in after verification
+      // The redirection will be handled by the AuthContext
       if (data.user) {
-        // In a real app, the API would return a token
-        // For now, we simulate this by passing the user object
         manualLogin(data.user);
+      } else {
+         setError("Could not log you in. Please try logging in manually.");
       }
-      
-      router.push("/dashboard");
 
     } catch (err: any) {
       setError(err.message);

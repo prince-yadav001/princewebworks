@@ -11,6 +11,11 @@ interface AuthContextType {
   loading: boolean;
 }
 
+const ADMIN_EMAILS = [
+  "princeyadavshyam@gmail.com",
+  "princebhai0045@gmail.com",
+];
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -32,14 +37,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setLoading(false);
   }, []);
-  
+
   const handleRedirect = (user: any) => {
-    if (user.role === 'ADMIN') {
+    if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
       router.push("/dashboard");
-    } else {
+    } else if (user && user.id) {
       router.push(`/${user.id}/dashboard`);
+    } else {
+      // Fallback to login if user object is not as expected
+      router.push('/login');
     }
-  }
+  };
 
   const login = async (email: string, password: string) => {
     // This is for the standard login page
@@ -66,7 +74,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     handleRedirect(userData);
   };
 
-
   const logout = () => {
     // Clear user from state and localStorage
     setUser(null);
@@ -82,9 +89,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

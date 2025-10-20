@@ -44,6 +44,11 @@ const featureCards = [
   },
 ];
 
+const ADMIN_EMAILS = [
+  "princeyadavshyam@gmail.com",
+  "princebhai0045@gmail.com",
+];
+
 export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === "hero");
   const { user, loading } = useAuth();
@@ -51,7 +56,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && user) {
-      if (user.role === 'ADMIN') {
+      if (user.email && ADMIN_EMAILS.includes(user.email)) {
         router.push("/dashboard");
       } else {
         router.push(`/${user.id}/dashboard`);
