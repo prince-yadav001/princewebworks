@@ -52,7 +52,10 @@ export async function POST(req: Request) {
     if (process.env.SENDGRID_API_KEY && process.env.EMAIL_FROM) {
       const msg = {
         to: email,
-        from: process.env.EMAIL_FROM!, // Correct format: just the email string
+        from: {
+            email: process.env.EMAIL_FROM!,
+            name: "PrinceWebWork CRM"
+        },
         subject: `Your Verification Code for PrinceWebWork CRM`,
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
