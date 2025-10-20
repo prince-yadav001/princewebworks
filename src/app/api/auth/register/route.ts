@@ -12,7 +12,7 @@ if (process.env.SENDGRID_API_KEY) {
 
 export async function POST(req: Request) {
   try {
-    const { name, username, email, password, role } = await req.json();
+    const { name, username, email, password } = await req.json();
 
     if (!name || !username || !email || !password) {
       return NextResponse.json({ message: "All fields are required." }, { status: 400 });
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
         password: hashedPassword,
         otp,
         isVerified: false,
-        role: role || 'USER', // Default to 'USER' if role is not provided
       },
     });
 
