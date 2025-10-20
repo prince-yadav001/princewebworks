@@ -9,14 +9,38 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String
-  username         String    @unique
-  email            String    @unique
-  password         String
-  isVerified       Boolean   @default(false)
-  otp              String?
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
+  id             String           @id @default("pww-uuid")
+  name           String
+  username       String           @unique
+  email          String           @unique
+  password       String
+  otp            String?
+  isVerified     Boolean          @default(false)
+  role           String           @default("USER")
+  createdAt      DateTime         @default(now())
+  lastLogin      DateTime?
+  JobApplication JobApplication[]
+}
+
+model Job {
+  id             String           @id
+  title          String
+  department     String?
+  description    String
+  location       String?
+  type           String?
+  createdAt      DateTime         @default(now())
+  JobApplication JobApplication[]
+}
+
+model JobApplication {
+  id        String   @id
+  userId    String
+  jobId     String
+  appliedAt DateTime @default(now())
+  status    String   @default("Pending")
+  Job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
 }

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 } else {
-    console.warn("SENDGRID_API_KEY not set. Email will not be sent.");
+  console.warn("SENDGRID_API_KEY not set. Email will not be sent.");
 }
 
 export async function POST(req: Request) {
@@ -120,8 +120,17 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("❌ Registration error:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("❌ Registration error details:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Registration failed",
+        error: error?.message || "Unknown error",
+        stack: error?.stack || null,
+      },
+      { status: 500 }
+    );
   }
 }
