@@ -11,7 +11,8 @@ import {
   History,
   Settings,
   Briefcase,
-  FileText
+  FileText,
+  BarChart,
 } from "lucide-react";
 
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -70,6 +71,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 function SidebarNavDesktop() {
   const navItems = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard/analytics", icon: BarChart, label: "Analytics" },
     { href: "/dashboard/leads", icon: Users, label: "Leads" },
     { href: "/dashboard/tasks", icon: ListTodo, label: "Tasks" },
     { href: "/dashboard/calls", icon: Phone, label: "Calls" },
