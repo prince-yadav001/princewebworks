@@ -48,8 +48,8 @@ export async function POST(req: Request) {
       );
     }
     
-    // Check if assigned user exists
-    if(assignedToId) {
+    // Check if assigned user exists only if assignedToId is provided
+    if (assignedToId) {
         const userExists = await prisma.user.findUnique({ where: { id: assignedToId } });
         if (!userExists) {
             return NextResponse.json({ message: "Assigned user not found" }, { status: 404 });

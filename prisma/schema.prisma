@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
 
 datasource db {
   provider  = "postgresql"
@@ -17,7 +17,7 @@ enum Role {
 }
 
 model User {
-  id            String    @id @unique
+  id            String    @id @default(cuid())
   name          String
   username      String    @unique
   email         String    @unique
@@ -26,7 +26,7 @@ model User {
   isVerified    Boolean   @default(false)
   role          Role      @default(USER)
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt     DateTime  @updatedAt @default(now())
   lastLogin     DateTime?
   applications  JobApplication[]
   leads         Lead[]
@@ -71,7 +71,7 @@ model Lead {
   status       LeadStatus @default(NEW)
   source       String?
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime   @updatedAt @default(now())
   assignedToId String?
   assignedTo   User?      @relation(fields: [assignedToId], references: [id])
 }
