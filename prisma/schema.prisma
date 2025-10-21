@@ -7,42 +7,52 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String    @id @default(uuid())
-  name          String
-  username      String    @unique
-  email         String    @unique
-  password      String
-  otp           String?
-  isVerified    Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  lastLogin     DateTime?
-  applications  JobApplication[]
+  id           String    @id @unique
+  name         String
+  username     String    @unique
+  email        String    @unique
+  password     String
+  otp          String?
+  isVerified   Boolean   @default(false)
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+  applications JobApplication[]
+
+  @@map("users")
 }
 
 model Job {
-  id            String    @id @default(uuid())
-  title         String
-  department    String?
-  description   String
-  location      String?
-  type          String?
-  createdAt     DateTime  @default(now())
-  applications  JobApplication[]
+  id           String    @id @default(cuid())
+  title        String
+  department   String?
+  description  String    @db.Text
+  location     String?
+  type         String?
+  createdAt    DateTime  @default(now())
+  applications JobApplication[]
+
+  @@map("jobs")
 }
 
 model JobApplication {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   userId    String
   jobId     String
-  appliedAt DateTime @default(now())
-  status    String   @default("pending") // e.g., pending, shortlisted, rejected
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  appliedAt DateTime @default(now())
+  status    String   @default("Pending") // e.g., Pending, Shortlisted, Rejected, Selected
 
   @@unique([userId, jobId])
+  @@map("job_applications")
+}
+
+enum Role {
+  USER
+  ADMIN
 }

@@ -3,12 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import sgMail from "@sendgrid/mail";
 import { prisma } from "@/lib/prisma";
+import { Role } from "@prisma/client";
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 } else {
     console.warn("SENDGRID_API_KEY not set. Email will not be sent.");
 }
+
+const ADMIN_EMAILS = [
+  "princeyadavshyam@gmail.com",
+  "princebhai0045@gmail.com",
+];
 
 export async function POST(req: Request) {
   try {
@@ -27,11 +33,14 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Determine user role
+    const userRole: Role = ADMIN_EMAILS.includes(email.toLowerCase()) ? Role.ADMIN : Role.USER;
+
     // Generate user ID and OTP
     const userId = `pww-${uuidv4()}`;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save user in database
+    // Save user in database with the correct role
     const newUser = await prisma.user.create({
       data: {
         id: userId,
@@ -41,10 +50,11 @@ export async function POST(req: Request) {
         password: hashedPassword,
         otp,
         isVerified: false,
+        role: userRole,
       },
     });
 
-    console.log(`✅ User saved: ${email}`);
+    console.log(`✅ User saved: ${email} with role: ${userRole}`);
     console.log(`🔑 OTP for ${email}: ${otp}`);
 
     // ✉️ Send OTP via SendGrid
@@ -106,8 +116,6 @@ export async function POST(req: Request) {
         console.log(`📧 OTP email sent to ${email}`);
       } catch (emailError) {
         console.error("❌ SendGrid email error:", emailError);
-        // We still return success to the user, as the user is created.
-        // Email failure can be handled separately (e.g., offer resend).
       }
     }
 
