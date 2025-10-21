@@ -1,58 +1,78 @@
-// This is your Prisma schema file
-// Learn more: https://pris.ly/d/prisma-schema
-
-datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
-enum Role {
-  USER
-  ADMIN
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL") // uses a direct connection
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  username      String    @unique
-  email         String    @unique
-  password      String
-  otp           String?
-  isVerified    Boolean   @default(false)
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt @default(now())
-  lastLogin     DateTime?
-  applications  JobApplication[]
-  leads         Lead[]
+  id              String           @id @default(uuid())
+  name            String
+  username        String           @unique
+  email           String           @unique
+  password        String
+  isVerified      Boolean          @default(false)
+  otp             String?
+  role            Role             @default(USER)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  lastLogin       DateTime?
+  leads           Lead[]           @relation("AssignedLeads")
+  jobApplications JobApplication[]
+
+  @@map("users")
 }
 
 model Job {
-  id            String    @id @default(cuid())
+  id            String           @id @default(uuid())
   title         String
   department    String?
   description   String
   location      String?
   type          String?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   applications  JobApplication[]
+
+  @@map("jobs")
 }
 
 model JobApplication {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   jobId     String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  status    String   @default("Pending")
   appliedAt DateTime @default(now())
+  status    String   @default("Pending") // e.g., Pending, Shortlisted, Selected, Rejected
 
   @@unique([userId, jobId])
+  @@map("job_applications")
+}
+
+model Lead {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  phone        String?
+  status       LeadStatus @default(NEW)
+  assignedToId String?
+  assignedTo   User?      @relation("AssignedLeads", fields: [assignedToId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("leads")
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum LeadStatus {
@@ -61,17 +81,4 @@ enum LeadStatus {
   QUALIFIED
   WON
   LOST
-}
-
-model Lead {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  phone        String?
-  status       LeadStatus @default(NEW)
-  source       String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt @default(now())
-  assignedToId String?
-  assignedTo   User?      @relation(fields: [assignedToId], references: [id])
 }
