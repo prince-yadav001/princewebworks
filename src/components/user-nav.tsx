@@ -11,23 +11,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
+// Helper function to generate a seed from email
+const getSeedFromEmail = (email: string) => {
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        const char = email.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+};
+
+
 export function UserNav() {
   const { user, logout } = useAuth();
-  const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar1');
 
   if (!user) return null;
+
+  const avatarSeed = getSeedFromEmail(user.email || '');
+  const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/100/100`;
+
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            {userAvatar && (
-              <AvatarImage src={userAvatar.imageUrl} alt="User Avatar" data-ai-hint={userAvatar.imageHint}/>
+            {user.email && (
+              <AvatarImage src={avatarUrl} alt="User Avatar" data-ai-hint="person portrait"/>
             )}
             <AvatarFallback>{user.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>

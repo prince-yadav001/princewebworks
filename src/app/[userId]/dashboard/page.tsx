@@ -13,16 +13,26 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
 import { Mail, Calendar, CheckCircle, User, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// Helper function to generate a seed from email
+const getSeedFromEmail = (email: string) => {
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        const char = email.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+};
+
 
 export default function UserDashboardPage() {
   const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar1');
 
   useEffect(() => {
     // Redirect unverified users
@@ -55,13 +65,26 @@ export default function UserDashboardPage() {
   }, [user, authLoading, router, toast]);
 
   // Show loading state while auth is loading or if user is being redirected
-  if (authLoading || !user || !user.isVerified) {
+  if (authLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
       </div>
     );
   }
+  
+  // Show a specific message for unverified users before redirecting
+  if (!user.isVerified) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Verification required. Redirecting...</p>
+      </div>
+    );
+  }
+
+  const avatarSeed = getSeedFromEmail(user.email || '');
+  const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/100/100`;
+
 
   // Render dashboard only if user is verified
   return (
@@ -77,7 +100,7 @@ export default function UserDashboardPage() {
           <CardContent className="grid gap-6">
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
-                {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="Avatar" />}
+                {user.email && <AvatarImage src={avatarUrl} alt="Avatar" data-ai-hint="person portrait"/>}
                 <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <div>

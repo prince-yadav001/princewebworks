@@ -8,8 +8,18 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
+
+// Helper function to generate a seed from email
+const getSeedFromEmail = (email: string) => {
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        const char = email.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+};
 
 
 export default function DashboardPage() {
@@ -22,8 +32,10 @@ export default function DashboardPage() {
       </div>
     );
   }
+  
+  const avatarSeed = getSeedFromEmail(user.email || '');
+  const avatarUrl = `https://picsum.photos/seed/${avatarSeed}/100/100`;
 
-  const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar1');
 
   return (
     <div className="flex flex-col w-full gap-8">
@@ -35,7 +47,7 @@ export default function DashboardPage() {
         <CardContent className="grid md:grid-cols-3 gap-6">
           <div className="flex items-center gap-4 col-span-1">
             <Avatar className="h-20 w-20">
-              {userAvatar && <AvatarImage src={userAvatar.imageUrl} alt="Avatar" />}
+              {user.email && <AvatarImage src={avatarUrl} alt="Avatar" data-ai-hint="person portrait"/>}
               <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
             <div>
