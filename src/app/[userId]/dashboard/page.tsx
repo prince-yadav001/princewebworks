@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from "react";
@@ -26,8 +25,9 @@ export default function UserDashboardPage() {
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar1');
 
   useEffect(() => {
+    // Redirect unverified users
     if (!authLoading && user && !user.isVerified) {
-      const resendOtp = async () => {
+      const resendOtpAndRedirect = async () => {
         try {
           await fetch('/api/auth/resend-otp', {
             method: 'POST',
@@ -46,13 +46,15 @@ export default function UserDashboardPage() {
             description: "Could not send verification code. Please try again.",
           });
         } finally {
-            router.push(`/${user.id}/verify-email`);
+          // Redirect to verification page
+          router.push(`/${user.id}/verify-email`);
         }
       };
-      resendOtp();
+      resendOtpAndRedirect();
     }
   }, [user, authLoading, router, toast]);
 
+  // Show loading state while auth is loading or if user is being redirected
   if (authLoading || !user || !user.isVerified) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -61,6 +63,7 @@ export default function UserDashboardPage() {
     );
   }
 
+  // Render dashboard only if user is verified
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-secondary p-4">
       <div className="w-full max-w-2xl">
