@@ -1,7 +1,8 @@
+"use client"
+
 import Link from "next/link";
 import {
   Bell,
-  Home,
   Menu,
   Search,
 } from "lucide-react";
@@ -20,11 +21,12 @@ import { SidebarNav } from "./sidebar-nav";
 import WorkspaceSwitcher from "./workspace-switcher";
 import { UserNav } from "./user-nav";
 import Logo from "./logo";
-import { notifications } from "@/lib/placeholder-data";
+import { useAuth } from "@/context/AuthContext";
+import { DashboardHeaderNav } from "./dashboard-header-nav";
 
 export function DashboardHeader() {
-  const unreadNotifications = notifications.filter(n => !n.read).length;
-
+  const { user } = useAuth();
+  
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -38,7 +40,11 @@ export function DashboardHeader() {
           <div className="p-4 border-b">
             <Logo />
           </div>
-          <SidebarNav />
+           {user?.role === 'ADMIN' ? (
+              <p>Admin nav coming soon</p>
+            ) : (
+             <DashboardHeaderNav />
+            )}
         </SheetContent>
       </Sheet>
 
@@ -61,23 +67,15 @@ export function DashboardHeader() {
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full relative">
             <Bell className="h-5 w-5" />
-            {unreadNotifications > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                    {unreadNotifications}
-                </span>
-            )}
             <span className="sr-only">Toggle notifications</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-80">
           <DropdownMenuLabel>Notifications</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {notifications.slice(0, 4).map(notification => (
-            <DropdownMenuItem key={notification.id} className="flex flex-col items-start gap-1">
-                <p className="font-semibold">{notification.title}</p>
-                <p className="text-xs text-muted-foreground">{notification.description}</p>
-            </DropdownMenuItem>
-          ))}
+          <DropdownMenuItem>
+            <p className="text-xs text-muted-foreground">No new notifications.</p>
+          </DropdownMenuItem>
            <DropdownMenuSeparator />
            <DropdownMenuItem className="text-center justify-center" asChild>
                 <Link href="/dashboard/notifications">View all notifications</Link>

@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+"use client"
 
-import { Badge } from "@/components/ui/badge";
+import { PlusCircle, File, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,20 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { leads, users } from "@/lib/placeholder-data";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -33,32 +23,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
-import { File } from "lucide-react";
-import { ListFilter } from "lucide-react";
-
 
 export default function LeadsPage() {
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "new":
-        return <Badge variant="secondary">{status}</Badge>;
-      case "contacted":
-        return <Badge className="bg-blue-500/20 text-blue-700 hover:bg-blue-500/30">{status}</Badge>;
-      case "qualified":
-        return <Badge className="bg-yellow-500/20 text-yellow-700 hover:bg-yellow-500/30">{status}</Badge>;
-      case "proposal":
-        return <Badge className="bg-purple-500/20 text-purple-700 hover:bg-purple-500/30">{status}</Badge>;
-      case "negotiation":
-        return <Badge className="bg-orange-500/20 text-orange-700 hover:bg-orange-500/30">{status}</Badge>;
-      case "won":
-        return <Badge className="bg-green-500/20 text-green-700 hover:bg-green-500/30">{status}</Badge>;
-      case "lost":
-        return <Badge variant="destructive">{status}</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
   return (
     <Tabs defaultValue="all">
       <div className="flex items-center">
@@ -112,48 +78,10 @@ export default function LeadsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Company</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Value</TableHead>
-                  <TableHead className="hidden md:table-cell">Assigned To</TableHead>
-                  <TableHead>
-                    <span className="sr-only">Actions</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => {
-                  const assignedUser = users.find(
-                    (user) => user.id === lead.assignedTo
-                  );
-                  return (
-                    <TableRow key={lead.id}>
-                      <TableCell>
-                        <div className="font-medium">{lead.name}</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          {lead.contact}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(lead.status)}</TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        ${lead.value.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        {assignedUser?.name || "Unassigned"}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No leads to display.</p>
+              <p className="text-sm text-muted-foreground">Live data coming soon.</p>
+            </div>
           </CardContent>
         </Card>
       </TabsContent>
