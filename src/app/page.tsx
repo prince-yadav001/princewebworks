@@ -57,7 +57,7 @@ export default function Home() {
   useEffect(() => {
     if (!loading && user) {
       if (user.email && ADMIN_EMAILS.includes(user.email)) {
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       } else {
         router.push(`/${user.id}/dashboard`);
       }

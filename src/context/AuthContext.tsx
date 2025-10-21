@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleRedirect = (user: any) => {
     if (user && user.email && ADMIN_EMAILS.includes(user.email)) {
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     } else if (user && user.id) {
       router.push(`/${user.id}/dashboard`);
     } else {
