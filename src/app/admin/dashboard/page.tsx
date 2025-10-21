@@ -1,11 +1,9 @@
-"use client";
+
 import {
   Users,
-  CheckCircle,
+  UserCheck,
   FileText,
   Activity,
-  UserCheck,
-  LineChart,
 } from "lucide-react";
 import {
   Card,
@@ -32,41 +30,57 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { subDays } from "date-fns";
+import { Role } from "@prisma/client";
 
-const recentUsers = [
-    {
-        name: "Olivia Martin",
-        email: "olivia.martin@email.com",
-        role: "USER",
-        status: "Verified",
-    },
-    {
-        name: "Jackson Lee",
-        email: "jackson.lee@email.com",
-        role: "USER",
-        status: "Pending",
-    },
-    {
-        name: "Isabella Nguyen",
-        email: "isabella.nguyen@email.com",
-        role: "ADMIN",
-        status: "Verified",
-    },
-    {
-        name: "William Kim",
-        email: "will@email.com",
-        role: "USER",
-        status: "Verified",
-    },
-    {
-        name: "Sofia Davis",
-        email: "sofia.davis@email.com",
-        role: "USER",
-        status: "Pending",
-    },
-];
+async function getAnalyticsData() {
+    const totalUsers = await prisma.user.count();
+    const verifiedUsers = await prisma.user.count({
+        where: { isVerified: true }
+    });
+    const totalApplications = await prisma.jobApplication.count();
+    
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    const activeUsersToday = await prisma.user.count({
+        where: {
+            lastLogin: {
+                gte: startOfToday,
+            }
+        }
+    });
 
-export default function AdminDashboardPage() {
+    const lastMonth = subDays(today, 30);
+    const usersLastMonth = await prisma.user.count({
+        where: { createdAt: { gte: lastMonth } }
+    });
+
+
+    const recentUsers = await prisma.user.findMany({
+        take: 5,
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    return {
+        totalUsers,
+        verifiedUsers,
+        totalApplications,
+        activeUsersToday,
+        usersLastMonth,
+        recentUsers,
+    }
+}
+
+
+export default async function AdminDashboardPage() {
+
+  const { totalUsers, verifiedUsers, totalApplications, activeUsersToday, recentUsers, usersLastMonth } = await getAnalyticsData();
+  const verifiedPercentage = totalUsers > 0 ? ((verifiedUsers / totalUsers) * 100).toFixed(0) : 0;
+
   return (
     <div className="flex flex-col gap-8">
       <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
@@ -79,8 +93,8 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,250</div>
-            <p className="text-xs text-muted-foreground">+5.2% from last month</p>
+            <div className="text-2xl font-bold">{totalUsers}</div>
+            <p className="text-xs text-muted-foreground">+{usersLastMonth} from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -89,8 +103,8 @@ export default function AdminDashboardPage() {
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">980</div>
-            <p className="text-xs text-muted-foreground">80% of total users</p>
+            <div className="text-2xl font-bold">{verifiedUsers}</div>
+            <p className="text-xs text-muted-foreground">{verifiedPercentage}% of total users</p>
           </CardContent>
         </Card>
         <Card>
@@ -101,9 +115,9 @@ export default function AdminDashboardPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">{totalApplications}</div>
             <p className="text-xs text-muted-foreground">
-              +201 since last hour
+              Across all job postings
             </p>
           </CardContent>
         </Card>
@@ -113,7 +127,7 @@ export default function AdminDashboardPage() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+45</div>
+            <div className="text-2xl font-bold">+{activeUsersToday}</div>
             <p className="text-xs text-muted-foreground">Users online today</p>
           </CardContent>
         </Card>
@@ -169,13 +183,13 @@ export default function AdminDashboardPage() {
                         <div className="text-sm text-muted-foreground">{user.email}</div>
                         </TableCell>
                         <TableCell>
-                            <Badge variant={user.role === 'ADMIN' ? 'destructive' : 'secondary'}>
+                            <Badge variant={user.role === Role.ADMIN ? 'destructive' : 'secondary'}>
                                 {user.role}
                             </Badge>
                         </TableCell>
                         <TableCell>
-                            <Badge variant={user.status === 'Verified' ? 'default' : 'outline'}>
-                                {user.status}
+                            <Badge variant={user.isVerified ? 'default' : 'outline'}>
+                                {user.isVerified ? "Verified" : "Pending"}
                             </Badge>
                         </TableCell>
                         <TableCell className="text-right">
