@@ -1,39 +1,19 @@
 "use client";
-import Link from "next/link";
-import { ArrowUpRight, PlusCircle, User, Calendar, Mail, CheckCircle, Users, Bell, ListTodo } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Mail, Calendar, CheckCircle, User } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { activities, leads, tasks, users } from "@/lib/placeholder-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import LeadsOverviewChart from "@/components/charts/leads-overview-chart";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { format, formatDistanceToNow } from "date-fns";
 
 
 export default function DashboardPage() {
   const { user } = useAuth();
-
-  const totalValue = leads.reduce((sum, lead) => sum + lead.value, 0);
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.status === "Completed").length;
-  const newLeadsThisMonth = leads.filter((l) => l.status === "New").length;
-  const unreadNotifications = 4;
 
   if (!user) {
     return (
