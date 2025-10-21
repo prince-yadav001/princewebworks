@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   Card,
@@ -15,12 +17,43 @@ import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
 import { Mail, Calendar, CheckCircle, User, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserDashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
   const userAvatar = PlaceHolderImages.find((p) => p.id === 'avatar1');
 
-  if (!user) {
+  useEffect(() => {
+    if (!authLoading && user && !user.isVerified) {
+      const resendOtp = async () => {
+        try {
+          await fetch('/api/auth/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user.id }),
+          });
+          toast({
+            title: "Verification Required",
+            description: "A new verification code has been sent to your email.",
+          });
+        } catch (error) {
+          console.error("Failed to resend OTP", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not send verification code. Please try again.",
+          });
+        } finally {
+            router.push(`/${user.id}/verify-email`);
+        }
+      };
+      resendOtp();
+    }
+  }, [user, authLoading, router, toast]);
+
+  if (authLoading || !user || !user.isVerified) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
